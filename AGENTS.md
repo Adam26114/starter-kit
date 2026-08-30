@@ -1,5 +1,13 @@
-<!-- BEGIN:nextjs-agent-rules -->
-# This is NOT the Next.js you know
+## Agent skills
 
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
-<!-- END:nextjs-agent-rules -->
+### Issue tracker
+
+Issues and specs are stored as local Markdown files under `.scratch/`. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Uses the default labels: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, and `wontfix`. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+This is a multi-context repository using `CONTEXT-MAP.md` and context-specific `CONTEXT.md` files. See `docs/agents/domain.md`.
