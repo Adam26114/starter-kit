@@ -1,6 +1,5 @@
 import { DashboardAuthBoundary } from "@/components/global/DashboardAuthBoundary"
 import { ConvexClientProvider } from "@/components/ConvexClientProvider"
-import { DashboardShell } from "@/components/dashboard-shell"
 
 /**
  * SOURCE OF TRUTH KEYWORDS: dashboard layout, protected route, session boundary, route composition
@@ -13,9 +12,7 @@ export default function DashboardLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <ConvexClientProvider>
-      <DashboardAuthBoundary>
-        <DashboardShell>{children}</DashboardShell>
-      </DashboardAuthBoundary>
+      <DashboardAuthBoundary>{children}</DashboardAuthBoundary>
     </ConvexClientProvider>
   )
 }

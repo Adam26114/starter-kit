@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { FolderKanban, LayoutDashboard } from "lucide-react"
+import { FolderKanban, LayoutDashboard, Shield } from "lucide-react"
 import { cn } from "@workspace/ui/lib/utils"
 import {
   Sidebar,
@@ -25,7 +25,13 @@ const navigation = [
   { title: "Projects", href: "/projects", icon: FolderKanban },
 ]
 
-export function DashboardShell({ children }: { children: React.ReactNode }) {
+export function DashboardShell({
+  children,
+  role,
+}: {
+  children: React.ReactNode
+  role: "admin" | "user"
+}) {
   const pathname = usePathname()
   const isProjects =
     pathname === "/projects" || pathname.startsWith("/projects/")
@@ -48,7 +54,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         <SidebarContent>
           <SidebarGroup>
             <SidebarGroupLabel>Platform</SidebarGroupLabel>
-            <DashboardNavigation pathname={pathname} />
+            <DashboardNavigation pathname={pathname} role={role} />
           </SidebarGroup>
         </SidebarContent>
       </Sidebar>
@@ -58,7 +64,9 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           <SidebarMobileTrigger className="md:hidden" />
           <div className="h-4 w-px bg-border md:hidden" />
           <div className="text-sm font-medium">{context}</div>
-          <div className="ml-auto text-sm text-muted-foreground">Workspace</div>
+          <div className="ml-auto text-sm text-muted-foreground">
+            {role === "admin" ? "Admin workspace" : "Workspace"}
+          </div>
         </header>
         <div className={cn("flex-1 p-4 md:p-6")}>{children}</div>
       </SidebarInset>
@@ -66,13 +74,22 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   )
 }
 
-function DashboardNavigation({ pathname }: { pathname: string }) {
+function DashboardNavigation({
+  pathname,
+  role,
+}: {
+  pathname: string
+  role: "admin" | "user"
+}) {
   const { closeMobileSidebar } = useSidebar()
+  const items = role === "admin"
+    ? [...navigation, { title: "Admin", href: "/admin", icon: Shield }]
+    : navigation
 
   return (
     <nav aria-label="Primary navigation">
       <SidebarMenu>
-        {navigation.map((item) => {
+        {items.map((item) => {
           const Icon = item.icon
           const active =
             pathname === item.href || pathname.startsWith(`${item.href}/`)
