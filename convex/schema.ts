@@ -11,6 +11,12 @@ export default defineSchema({
   authBootstrap: defineTable({
     key: v.literal("singleton"),
     role: v.union(v.literal("admin"), v.literal("user")),
+    winnerUserId: v.optional(v.string()),
+    retryStates: v.optional(v.record(v.string(), v.object({
+      attempt: v.number(),
+      correlationId: v.optional(v.string()),
+      terminal: v.boolean(),
+    }))),
   }).index("by_key", ["key"]),
   projects: defineTable({
     ownerId: v.string(),
