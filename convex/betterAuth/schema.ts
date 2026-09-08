@@ -8,6 +8,10 @@ const user = defineTable({
   ...tables.user.validator.fields,
   role: roleValidator,
 })
+  .index("email", ["email"])
+  .index("email_name", ["email", "name"])
+  .index("name", ["name"])
+  .index("userId", ["userId"])
 
 const schema = defineSchema({
   ...tables,

@@ -1,7 +1,9 @@
 import { createClient } from "@convex-dev/better-auth"
+import { convex } from "@convex-dev/better-auth/plugins"
 import { components } from "./_generated/api"
 import { env } from "./_generated/server"
 import type { GenericCtx } from "@convex-dev/better-auth"
+import authConfig from "./auth.config"
 
 export const createAuthOptions = (ctx: GenericCtx, forSchema = true) => ({
   database: createClient(components.betterAuth).adapter(ctx),
@@ -13,6 +15,7 @@ export const createAuthOptions = (ctx: GenericCtx, forSchema = true) => ({
       bootstrapRoleRequest: { type: "string" as const, required: false, input: false },
     },
   },
+  plugins: [convex({ authConfig })],
   secret: forSchema ? "schema-generation-secret" : requiredEnv("BETTER_AUTH_SECRET"),
   baseURL: forSchema ? "http://localhost:3000" : requiredEnv("SITE_URL"),
 })
