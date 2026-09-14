@@ -2,8 +2,10 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { FolderKanban, LayoutDashboard, Shield } from "lucide-react"
+import { FolderKanban, LayoutDashboard, Moon, Shield, Sun } from "lucide-react"
+import { useTheme } from "next-themes"
 import { cn } from "@workspace/ui/lib/utils"
+import { Button } from "@workspace/ui/components/button"
 import {
   Sidebar,
   SidebarContent,
@@ -14,6 +16,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMobileClose,
   SidebarMobileTrigger,
   SidebarProvider,
   SidebarTrigger,
@@ -35,7 +38,9 @@ export function DashboardShell({
   const pathname = usePathname()
   const isProjects =
     pathname === "/projects" || pathname.startsWith("/projects/")
-  const context = isProjects ? "Projects" : "Dashboard"
+  const isAdmin = pathname === "/admin" || pathname.startsWith("/admin/")
+  const currentSection = isAdmin ? "Admin" : isProjects ? "Projects" : "Dashboard"
+  const { resolvedTheme, setTheme } = useTheme()
 
   return (
     <SidebarProvider>
@@ -50,6 +55,7 @@ export function DashboardShell({
             </span>{" "}
             <span>Starterkit</span>
           </Link>
+          <SidebarMobileClose className="ml-auto" />
         </SidebarHeader>
         <SidebarContent>
           <SidebarGroup>
@@ -63,9 +69,24 @@ export function DashboardShell({
           <SidebarTrigger className="hidden md:inline-flex" />
           <SidebarMobileTrigger className="md:hidden" />
           <div className="h-4 w-px bg-border md:hidden" />
-          <div className="text-sm font-medium">{context}</div>
-          <div className="ml-auto text-sm text-muted-foreground">
-            {role === "admin" ? "Admin workspace" : "Workspace"}
+          <div className="text-sm font-medium">{currentSection}</div>
+          <div className="ml-auto flex items-center gap-2">
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              aria-label="Toggle theme"
+              title="Toggle theme"
+              onClick={() =>
+                setTheme(resolvedTheme === "dark" ? "light" : "dark")
+              }
+            >
+              <Moon className="dark:hidden" aria-hidden="true" />
+              <Sun className="hidden dark:block" aria-hidden="true" />
+            </Button>
+            <span className="hidden text-sm text-muted-foreground sm:inline">
+              {role === "admin" ? "Admin workspace" : "Workspace"}
+            </span>
           </div>
         </header>
         <div className={cn("flex-1 p-4 md:p-6")}>{children}</div>
@@ -101,7 +122,7 @@ function DashboardNavigation({
                 title={item.title}
                 className="block rounded-md focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
                 aria-current={active ? "page" : undefined}
-                onClick={closeMobileSidebar}
+                onClick={() => closeMobileSidebar({ restoreFocus: false })}
               >
                 <SidebarMenuButton isActive={active}>
                   <Icon className="size-4" aria-hidden="true" />

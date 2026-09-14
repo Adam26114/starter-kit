@@ -1,18 +1,18 @@
 # Dashboard Starterkit PRD
 
-## Proposed test seam
-
-Use one highest-level seam: the authenticated `/dashboard` route. Verify the complete flow through the dashboard shell, sidebar navigation, existing Projects feature, auth boundary, loading/error states, and responsive layout.
+Status: ready-for-agent
 
 ## Problem Statement
 
-The starterkit has an authenticated Convex dashboard route, but it currently renders only a basic projects view. It lacks a reusable dashboard shell with sidebar navigation, responsive layout, header controls, and shadcn/ui dashboard styling.
+The dashboard starter shell implementation landed in commit f18220f, but it still needs verification against the current repository and targeted gap-fixing where behavior or polish is incomplete. The starterkit must provide a coherent authenticated dashboard experience without weakening the existing Better Auth protection, Convex data flow, or Projects workflow.
+
+The implementation should be evaluated as an existing feature, not treated as a greenfield build. The key risks are regressions around the route-group shell, DashboardAuthBoundary, Convex provider timing, shared UI primitives, responsive and accessible navigation, demo-data labeling, and preservation of the existing `/admin` route.
 
 ## Solution
 
-Integrate shadcn/ui `dashboard-01` as the dashboard starter shell while preserving the existing Better Auth protection, Convex provider, project CRUD behavior, pagination, and error handling.
+Verify and, where needed, make focused fixes to the existing shadcn/ui `dashboard-01`-inspired dashboard starter shell. Preserve Better Auth protection, the Convex provider, project CRUD behavior, pagination, loading and error handling, and the existing route structure.
 
-Adapt the block to the repository's `base-nova`, Tailwind v4, Base UI, workspace-package, and feature-local architecture.
+The authenticated route-group shell should provide reusable sidebar and header behavior while keeping app-specific composition in the web app and reusable UI primitives shared. `ProjectsView` remains the project data and CRUD source of truth. Static cards, charts, tables, or other starter content must be visibly labeled as demo content rather than presented as production metrics.
 
 ## User Stories
 
@@ -64,11 +64,12 @@ Adapt the block to the repository's `base-nova`, Tailwind v4, Base UI, workspace
 - Keep reusable primitives in the shared UI package.
 - Keep app-specific sidebar, header, navigation, and dashboard composition in the web application.
 - Integrate the shell into the existing authenticated dashboard route group.
-- Preserve the existing Convex provider and Better Auth boundary.
+- Preserve the existing Convex provider and Better Auth boundary through `DashboardAuthBoundary`.
 - Preserve the existing feature error boundary around the Projects feature.
 - Keep `ProjectsView` as the source of truth for project data and CRUD behavior.
 - Do not create a second route that resolves to `/dashboard`.
 - Use real dashboard and projects links rather than placeholder hashes.
+- Preserve the existing `/admin` route and its behavior.
 - Preserve existing theme tokens, sidebar variables, and dark-mode behavior.
 - Add only dependencies required by imported dashboard components.
 - Use chart/table/demo elements only as clearly labeled starter content unless real Convex data is available.
@@ -76,12 +77,14 @@ Adapt the block to the repository's `base-nova`, Tailwind v4, Base UI, workspace
 - Do not duplicate project server state in Redux or local dashboard state.
 - Use the existing project loading, empty, error, pagination, and mutation feedback states.
 - Preserve unrelated uncommitted work in the repository.
-- Avoid broad formatting or regeneration outside the dashboard integration.
+- Avoid broad formatting or regeneration outside targeted dashboard gap fixes.
+- Treat commit f18220f as the baseline implementation to verify and refine, not as an absent feature requiring wholesale replacement.
+- Make no authentication, schema, or Convex API changes.
 
 ## Testing Decisions
 
 - Test observable behavior rather than internal component structure.
-- Prefer the authenticated dashboard route as the single high-level integration seam.
+- Prefer the authenticated `/dashboard` route as the single highest-level integration seam; do not introduce a new test seam when this route can exercise the behavior.
 - Verify unauthenticated users are redirected to sign-in.
 - Verify authenticated users see the dashboard shell and Projects feature.
 - Verify sidebar collapse and mobile navigation behavior.
@@ -90,6 +93,10 @@ Adapt the block to the repository's `base-nova`, Tailwind v4, Base UI, workspace
 - Verify loading, empty, error, retry, loading-more, and exhausted pagination states.
 - Verify light and dark theme rendering.
 - Verify keyboard focus and accessible labels for navigation controls.
+- Verify responsive behavior at desktop, tablet, and mobile widths, including no overflow and usable off-canvas navigation.
+- Verify semantic navigation landmarks and visible focus states.
+- Verify demo cards, charts, tables, and metrics are labeled as starter or demo content when present.
+- Verify the existing `/admin` route remains reachable and unchanged.
 - Run the repository's lint command.
 - Run the repository's typecheck command.
 - Run the production build.
@@ -113,6 +120,6 @@ Adapt the block to the repository's `base-nova`, Tailwind v4, Base UI, workspace
 
 ## Further Notes
 
-The official block includes demo-oriented cards, chart, table, navigation, and additional UI primitives. The main integration risk is adapting those pieces without overwriting existing shared components or introducing a duplicate `/dashboard` route.
+The official block includes demo-oriented cards, chart, table, navigation, and additional UI primitives. The main verification risk is adapting those pieces without overwriting existing shared components, obscuring demo data, introducing a duplicate `/dashboard` route, or regressing `/admin`.
 
-The issue tracker and `ready-for-agent` label vocabulary are not configured in this repository. Run `/setup-matt-pocock-skills` before publishing this PRD as an issue.
+The authenticated `/dashboard` route is the primary test seam for the complete flow: route-group shell, DashboardAuthBoundary, Convex provider, sidebar and header navigation, ProjectsView, loading and error states, responsive behavior, and accessibility. Verification should lead to targeted fixes only where the existing implementation misses these expectations.

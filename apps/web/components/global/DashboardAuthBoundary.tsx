@@ -58,7 +58,12 @@ export function DashboardAuthBoundary({
     (isAdminRoute && adminAuthorization?.authorized !== true)
   )
     return (
-      <div className="flex min-h-svh items-center justify-center p-6 text-sm text-muted-foreground">
+      <div
+        className="flex min-h-svh items-center justify-center p-6 text-sm text-muted-foreground"
+        role="status"
+        aria-live="polite"
+        aria-busy="true"
+      >
         Loading your workspace...
       </div>
     )

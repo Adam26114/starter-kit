@@ -24,12 +24,17 @@ type ProjectFormProps = {
  * WHERE: Project list cards use this form for creating and editing projects.
  */
 export function ProjectForm({ initialValues, submitLabel, onSubmit, onCancel, disabled = false }: ProjectFormProps) {
+  const initialName = initialValues?.name ?? ""
+  const initialDescription = initialValues?.description ?? ""
   const form = useForm<ProjectFormValues>({
     resolver: zodResolver(projectFormSchema),
-    defaultValues: initialValues ?? { name: "", description: "" },
+    defaultValues: { name: initialName, description: initialDescription },
   })
+  const { reset } = form
 
-  useEffect(() => { form.reset(initialValues ?? { name: "", description: "" }) }, [form, initialValues])
+  useEffect(() => {
+    reset({ name: initialName, description: initialDescription })
+  }, [reset, initialName, initialDescription])
 
   return (
     <Form {...form}><form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-3">

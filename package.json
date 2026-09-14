@@ -8,6 +8,7 @@
     "lint": "turbo lint",
     "format": "turbo format",
     "typecheck": "turbo typecheck",
+    "test": "bun test",
     "codegen": "bunx convex codegen",
     "convex:dev": "bunx convex dev"
   },

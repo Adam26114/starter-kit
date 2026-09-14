@@ -2,7 +2,7 @@
 
 **What to build:**
 
-The dashboard includes the dashboard-01 presentation structure such as cards, chart, or table, with all static values clearly labeled as starter/demo content and no fabricated production metrics.
+The dashboard includes a dashboard-01-inspired starter presentation inside the authenticated shell, using cards, a chart, a table, or equivalent content. Static values are visibly labeled as demo or starter content, while ProjectsView remains the real data source.
 
 **Blocked by:** 01: Integrate authenticated dashboard shell
 
@@ -10,8 +10,8 @@ The dashboard includes the dashboard-01 presentation structure such as cards, ch
 
 ## Acceptance criteria
 
-- Dashboard-01 presentation elements render inside the authenticated shell.
-- Static values are visibly identified as starter/demo content, or omitted when they would be misleading.
-- Existing ProjectsView remains the real data-driven dashboard content and source of truth.
-- Required shared primitives and dependencies are added only when used.
-- Existing theme tokens and Base UI/shadcn conventions are preserved.
+- [x] Cards, a chart, a table, or equivalent dashboard-01-inspired starter presentation elements render inside the authenticated shell.
+- [x] Every static value is visibly identified as demo or starter content, or is omitted when it would be misleading.
+- [x] ProjectsView remains the real data-driven project source of truth and is not replaced by fabricated dashboard state.
+- [x] Only shared primitives and dependencies used by the presentation are added.
+- [x] Existing theme tokens and Base UI conventions are preserved.

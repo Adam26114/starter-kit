@@ -10,11 +10,13 @@ type SidebarContextValue = {
   mobileTriggerRef: React.RefObject<HTMLButtonElement | null>
   setOpen: (open: boolean) => void
   setMobileOpen: (open: boolean) => void
-  closeMobileSidebar: () => void
+  closeMobileSidebar: (options?: { restoreFocus?: boolean }) => void
   toggleSidebar: () => void
 }
 
 const SidebarContext = React.createContext<SidebarContextValue | null>(null)
+const FOCUSABLE_ELEMENT_SELECTOR =
+  'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
 
 function useSidebar() {
   const context = React.useContext(SidebarContext)
@@ -59,10 +61,13 @@ function SidebarProvider({
   const [mobileOpen, setMobileOpen] = React.useState(false)
   const mobileTriggerRef = React.useRef<HTMLButtonElement>(null)
   const toggleSidebar = React.useCallback(() => setOpen((value) => !value), [])
-  const closeMobileSidebar = React.useCallback(() => {
-    setMobileOpen(false)
-    mobileTriggerRef.current?.focus()
-  }, [])
+  const closeMobileSidebar = React.useCallback(
+    ({ restoreFocus = true }: { restoreFocus?: boolean } = {}) => {
+      setMobileOpen(false)
+      if (restoreFocus) mobileTriggerRef.current?.focus()
+    },
+    [],
+  )
   return (
     <SidebarContext.Provider
       value={{
@@ -84,32 +89,78 @@ function Sidebar({
   children,
   className,
 }: React.PropsWithChildren<{ className?: string }>) {
-  const { open, mobileOpen, closeMobileSidebar } = useSidebar()
+  const { open, mobileOpen, setMobileOpen, closeMobileSidebar } = useSidebar()
   const isMobile = useIsMobile()
   const sidebarRef = React.useRef<HTMLElement>(null)
+
+  React.useEffect(() => {
+    if (!isMobile && mobileOpen) {
+      setMobileOpen(false)
+    }
+  }, [isMobile, mobileOpen, setMobileOpen])
+
+  React.useEffect(() => {
+    if (!isMobile || !mobileOpen) return
+
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = "hidden"
+
+    return () => {
+      document.body.style.overflow = previousOverflow
+    }
+  }, [isMobile, mobileOpen])
 
   React.useEffect(() => {
     if (!isMobile || !mobileOpen) return
 
     const firstFocusableElement =
       sidebarRef.current?.querySelector<HTMLElement>(
-        'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        FOCUSABLE_ELEMENT_SELECTOR,
       )
     firstFocusableElement?.focus({ preventScroll: true })
   }, [isMobile, mobileOpen])
 
   React.useEffect(() => {
-    if (!mobileOpen) return
+    if (!isMobile || !mobileOpen) return
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== "Escape") return
-      event.preventDefault()
-      closeMobileSidebar()
+      if (event.key === "Escape") {
+        event.preventDefault()
+        closeMobileSidebar()
+        return
+      }
+
+      if (event.key !== "Tab") return
+
+      const focusableElements = Array.from(
+        sidebarRef.current?.querySelectorAll<HTMLElement>(
+          FOCUSABLE_ELEMENT_SELECTOR,
+        ) ?? [],
+      ).filter((element) => element.getClientRects().length > 0)
+
+      if (focusableElements.length === 0) {
+        event.preventDefault()
+        sidebarRef.current?.focus({ preventScroll: true })
+        return
+      }
+
+      const first = focusableElements[0]
+      const last = focusableElements[focusableElements.length - 1]
+      if (!first || !last) return
+      const activeElement = document.activeElement
+
+      if (event.shiftKey && (activeElement === first || !sidebarRef.current?.contains(activeElement))) {
+        event.preventDefault()
+        last.focus({ preventScroll: true })
+      } else if (!event.shiftKey && (activeElement === last || !sidebarRef.current?.contains(activeElement))) {
+        event.preventDefault()
+        first.focus({ preventScroll: true })
+      }
     }
 
     document.addEventListener("keydown", handleKeyDown)
     return () => document.removeEventListener("keydown", handleKeyDown)
-  }, [closeMobileSidebar, mobileOpen])
+  }, [closeMobileSidebar, isMobile, mobileOpen])
 
   return (
     <>
@@ -117,14 +168,18 @@ function Sidebar({
         <button
           type="button"
           aria-label="Close sidebar"
+          tabIndex={-1}
           className="fixed inset-0 z-40 bg-black/40 md:hidden"
-          onClick={closeMobileSidebar}
+          onClick={() => closeMobileSidebar()}
         />
       )}
       <aside
         ref={sidebarRef}
         id="dashboard-sidebar"
-        aria-label="Sidebar"
+        aria-label="Main navigation"
+        aria-modal={isMobile && mobileOpen ? true : undefined}
+        role={isMobile && mobileOpen ? "dialog" : undefined}
+        tabIndex={isMobile && mobileOpen ? -1 : undefined}
         data-slot="sidebar"
         data-state={open ? "expanded" : "collapsed"}
         data-mobile-state={mobileOpen ? "open" : "closed"}
@@ -303,6 +358,24 @@ function SidebarMobileTrigger({ className }: { className?: string }) {
   )
 }
 
+function SidebarMobileClose({ className }: { className?: string }) {
+  const { closeMobileSidebar } = useSidebar()
+
+  return (
+    <button
+      type="button"
+      aria-label="Close sidebar"
+      className={cn(
+        "inline-flex size-8 items-center justify-center rounded-md hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none md:hidden",
+        className,
+      )}
+      onClick={() => closeMobileSidebar()}
+    >
+      <X className="size-4" aria-hidden="true" />
+    </button>
+  )
+}
+
 function SidebarInset({
   children,
   className,
@@ -330,6 +403,7 @@ export {
   SidebarProvider,
   SidebarHeader,
   SidebarMobileTrigger,
+  SidebarMobileClose,
   SidebarTrigger,
   useSidebar,
 }
